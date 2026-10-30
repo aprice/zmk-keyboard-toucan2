@@ -2,3 +2,5 @@
 .zmk/
 /.DS_Store
 /out
+/ws
+/.ckb

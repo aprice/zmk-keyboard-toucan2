@@ -1,0 +1,52 @@
+version: "3"
+
+vars:
+  container: zmk-build
+  image: '{{if env "IMAGE"}}{{env "IMAGE"}}{{else}}zmkfirmware/zmk-build-arm:stable{{end}}'
+  STUDIO: '{{if env "STUDIO"}}{{env "STUDIO"}}{{else}}y{{end}}'
+  DBG: '{{if env "DBG"}}{{env "DBG"}}{{else}}0{{end}}'
+  NOSCREEN: '{{if env "NOSCREEN"}}{{env "NOSCREEN"}}{{else}}0{{end}}'
+  NODISP: '{{if env "NODISP"}}{{env "NODISP"}}{{else}}0{{end}}'
+  PRISTINE: '{{if env "PRISTINE"}}{{env "PRISTINE"}}{{else}}0{{end}}'
+
+tasks:
+  up:
+    desc: Launch the persistent build container (detached, idempotent)
+    cmds:
+      - mkdir -p ws out
+      - docker rm -f {{.container}} 2>/dev/null || true
+      - docker run -d --name {{.container}} -v "$PWD":/src:ro -v "$PWD/ws":/ws -v "$PWD/out":/out -w /ws {{.image}} sleep infinity
+
+  down:
+    desc: Remove the persistent build container
+    cmds:
+      - docker rm -f {{.container}}
+
+  connect:
+    desc: Open a shell in the persistent container
+    cmds:
+      - docker exec -it -w /src {{.container}} bash
+
+  build:
+    desc: Run the build script (assumes you are already inside a container)
+    cmds:
+      - bash /src/build.sh
+
+  runup:
+    desc: Build inside the persistent container, leaving it running
+    deps: [up]
+    cmds:
+      - docker exec -e STUDIO={{.STUDIO}} -e DBG={{.DBG}} -e NOSCREEN={{.NOSCREEN}} -e NODISP={{.NODISP}} -e PRISTINE={{.PRISTINE}} -w /ws {{.container}} bash /src/build.sh
+      - task: dotclean
+
+  run:
+    desc: Build in a one-shot container, then clean metadata
+    cmds:
+      - mkdir -p ws out
+      - docker run --rm -e STUDIO={{.STUDIO}} -e DBG={{.DBG}} -e NOSCREEN={{.NOSCREEN}} -e NODISP={{.NODISP}} -e PRISTINE={{.PRISTINE}} -v "$PWD":/src:ro -v "$PWD/ws":/ws -v "$PWD/out":/out -w /ws {{.image}} bash /src/build.sh
+      - task: dotclean
+
+  dotclean:
+    desc: Remove AppleDouble metadata files from out/
+    cmds:
+      - dot_clean -m out/*

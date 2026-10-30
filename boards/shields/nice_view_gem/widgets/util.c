@@ -11,10 +11,9 @@ void to_uppercase(char *str) {
 
 void fill_background(lv_obj_t *canvas) {
     lv_draw_rect_dsc_t rect_black_dsc;
-    rect_black_dsc.bg_color = lv_color_white();  // set background color to white
     init_rect_dsc(&rect_black_dsc, LVGL_BACKGROUND);
 
-    lv_canvas_draw_rect(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, &rect_black_dsc);
+    draw_rect_on_canvas(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, &rect_black_dsc);
 }
 
 void init_label_dsc(lv_draw_label_dsc_t *label_dsc, lv_color_t color, const lv_font_t *font,
@@ -34,4 +33,41 @@ void init_line_dsc(lv_draw_line_dsc_t *line_dsc, lv_color_t color, uint8_t width
     lv_draw_line_dsc_init(line_dsc);
     line_dsc->color = color;
     line_dsc->width = width;
+}
+
+void draw_rect_on_canvas(lv_obj_t *canvas, int32_t x, int32_t y, int32_t w, int32_t h,
+                         lv_draw_rect_dsc_t *rect_dsc) {
+    lv_layer_t layer;
+    lv_canvas_init_layer(canvas, &layer);
+
+    lv_area_t coords = {x, y, x + w - 1, y + h - 1};
+    lv_draw_rect(&layer, rect_dsc, &coords);
+
+    lv_canvas_finish_layer(canvas, &layer);
+}
+
+void draw_text_on_canvas(lv_obj_t *canvas, int32_t x, int32_t y, int32_t max_w,
+                         lv_draw_label_dsc_t *label_dsc, const char *text) {
+    label_dsc->text = text;
+
+    lv_layer_t layer;
+    lv_canvas_init_layer(canvas, &layer);
+
+    lv_area_t coords = {x, y, x + max_w - 1, y + lv_font_get_line_height(label_dsc->font) - 1};
+    lv_draw_label(&layer, label_dsc, &coords);
+
+    lv_canvas_finish_layer(canvas, &layer);
+}
+
+void draw_image_on_canvas(lv_obj_t *canvas, int32_t x, int32_t y, const lv_image_dsc_t *img,
+                          lv_draw_image_dsc_t *draw_dsc) {
+    draw_dsc->src = img;
+
+    lv_layer_t layer;
+    lv_canvas_init_layer(canvas, &layer);
+
+    lv_area_t coords = {x, y, x + img->header.w - 1, y + img->header.h - 1};
+    lv_draw_image(&layer, draw_dsc, &coords);
+
+    lv_canvas_finish_layer(canvas, &layer);
 }

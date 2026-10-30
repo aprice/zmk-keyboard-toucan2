@@ -16,7 +16,7 @@ manifest:
       revision: main
     - name: zmk-rgbled-widget
       remote: caksoylar
-      revision: v0.3
+      revision: main
     - name: zmk_driver_azoteq
       remote: beekeeb
       revision: main

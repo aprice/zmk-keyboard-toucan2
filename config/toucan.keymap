@@ -47,7 +47,7 @@
             quick-tap-ms = <175>;
             bindings = <&kp>, <&kp>;
             hold-trigger-on-release;
-    		told-trigger-key-positions = <KEYS_L KEYS_T>;
+    		hold-trigger-key-positions = <KEYS_L KEYS_T>;
         };
         rhr: right_home_row_mod {
             compatible = "zmk,behavior-hold-tap";
@@ -58,7 +58,7 @@
             quick-tap-ms = <175>;
             bindings = <&kp>, <&kp>;
             hold-trigger-on-release;
-    		told-trigger-key-positions = <KEYS_R KEYS_T>;
+    		hold-trigger-key-positions = <KEYS_R KEYS_T>;
         };
     };
 
